@@ -14,7 +14,7 @@ userapp.post('/login' , expressAsyncHandler(async(request,response)=>{
     const userCollectionObj = request.app.get("userCollectionObj")
     //get user Credentials from req
     const userCredObj = request.body
-    console.log(userCredObj)
+    console.log("userobj:"+userCredObj)
     //verify username
     let userOfDB = await userCollectionObj.findOne({username:userCredObj.username})
     //if username is invalid
@@ -25,17 +25,18 @@ userapp.post('/login' , expressAsyncHandler(async(request,response)=>{
     else{
         //verify password
         console.log(userOfDB.password)
-        let isEqual = await bcryptjs.compare(userCredObj.password,userOfDB.password)
+        // let isEqual = await bcryptjs.compare(userCredObj.password,userOfDB.password)
         //if passwords are not matched
-        if(isEqual===false){
+        // console.log(isEqual);
+        if(userOfDB.password!==userCredObj.password){
             response.status(200).send({message:"Invalid Password"})
         }
         //if passwords matched
         else{
             //create a jwt token
-            let jwtToken = jwt.sign({username:userOfDB.username},'abcdef',{expiresIn:"2d"})
+            // let jwtToken = jwt.sign({username:userOfDB.username},'abcdef',{expiresIn:"2d"})
             //send token in response
-            response.status(200).send({message:"success",token:jwtToken,user:userOfDB})
+            response.status(200).send({message:"success",/*token:jwtToken*/user:userOfDB})//token:jwtToken,
         }
     }
 }))

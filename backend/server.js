@@ -20,6 +20,7 @@ mClient.connect('mongodb://127.0.0.1:27017')
     const JobsCollection=elevatehubObj.collection('jobs');
     const NewMentorsCollection = elevatehubObj.collection('NewMentors')
     const AllMentorsCollection = elevatehubObj.collection('AllMentors')
+    const AdminCollection=elevatehubObj.collection('adminLogin');
 
 
 app.set("userCollectionObj",userCollectionObj);
@@ -28,6 +29,7 @@ app.set("CompetitionCollection",CompetitionCollection);
 app.set('JobsCollection',JobsCollection);
 app.set("NewMentorsCollection",NewMentorsCollection);
 app.set('AllMentorsCollection',AllMentorsCollection);
+app.set('AdminCollection',AdminCollection);
 
 
 console.log("Database Successfully Connected");
@@ -39,7 +41,7 @@ console.log("Database Successfully Connected");
 //APIS
 
 const userapp=require('./userAPI');
-app.use('/user',userapp);
+app.use('/student',userapp);
 
 
 
@@ -61,6 +63,8 @@ app.use('/compete',competitionapp);
 const mentorsapp=require('./mentorsAPI');
 app.use('/mentors',mentorsapp);
 
+const adminapp=require('./adminApi');
+app.use('/admin',adminapp);
 
 //Error handlers
 

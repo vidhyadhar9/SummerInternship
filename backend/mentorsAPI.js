@@ -1,11 +1,72 @@
 const exp = require('express')
 const mentorsapp = exp.Router()
 const {ObjectId} = require('mongodb')
-
+const bcryptjs = require("bcryptjs")
+const jwt = require("jsonwebtoken")
+const expressAsyncHandler = require("express-async-handler")
 //body parser
 mentorsapp.use(exp.json());
 
 
+
+
+mentorsapp.post('/signup' ,expressAsyncHandler(async(request,response)=>{
+    //get userCollectionObj
+    const AllMentorsCollection = request.app.get("AllMentorsCollection")
+    //get newUser from request
+    const newUser = request.body;
+    //check for duplicate user by username
+    let userOfDB = await AllMentorsCollection.findOne({username:newUser.username})
+    //if user already existed, send res to client "User already existed"
+    if(userOfDB!=null){
+        response.status(200).send({message:"User already existed"})
+    }
+    //if user not existed
+    else{
+        //hash the password
+        let hashedPassword = await bcryptjs.hash(newUser.password,5)
+        //replace plane password with hashed password
+        newUser.password = hashedPassword;
+        //insert user
+        await AllMentorsCollection.insertOne(newUser)
+        //send res
+        response.status(201).send({message:"User Created"})
+    }
+
+})
+)
+
+mentorsapp.post('/login',async(request,response)=>{
+ //get AllMentorsCollectionObj
+ const AllMentorsCollectionObj = request.app.get("AllMentorsCollection")
+ //get user Credentials from req
+ const AllMentorsCredObj = request.body
+ console.log(AllMentorsCredObj)
+ //verify username
+ let AllMentorsOfDB = await AllMentorsCollectionObj.findOne({username:AllMentorsCredObj.username})
+ //if username is invalid
+ if(AllMentorsOfDB===null){
+     response.status(200).send({message:"Invalid username"})
+ }
+ //if username is valid
+ else{
+     //verify password
+     console.log(AllMentorsOfDB.password)
+     let isEqual = await bcryptjs.compare(AllMentorsCredObj.password,AllMentorsOfDB.password)
+     //if passwords are not matched
+     console.log(isEqual);
+     if(!isEqual){
+         response.status(200).send({message:"Invalid Password"})
+     }
+     //if passwords matched
+     else{
+         //create a jwt token
+         // let jwtToken = jwt.sign({username:userOfDB.username},'abcdef',{expiresIn:"2d"})
+         //send token in response
+         response.status(200).send({message:"success",/*token:jwtToken*/user:AllMentorsOfDB})//token:jwtToken,
+     }
+ }
+})
 
 //retriving of all New Mentors
 mentorsapp.get('/get-New-Mentors' , (request,response)=>{
